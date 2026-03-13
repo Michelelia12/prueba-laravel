@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "DEVSENSE.phptools-vscode",
+        "laravel.vscode-laravel",
+        "onecentlin.laravel-blade",
+        "bradlc.vscode-tailwindcss",
+        "mlewand.select-part-of-word",
+        "ehaynes99.vscode-select-same-text",
+        "tomoki1207.pdf",
+        "mehedidracula.php-namespace-resolver"
+    ]
+}

@@ -15,10 +15,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "bmewburn.vscode-intelephense-client",
-                "laravel.vscode-laravel",
-                "bradlc.vscode-tailwindcss",
-                "tomoki1207.pdf"
+                "bmewburn.vscode-intelephense-client"
             ]
         }
     }
