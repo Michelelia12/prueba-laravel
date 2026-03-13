@@ -1,0 +1,14 @@
+name: "prueba-laravel-devcontainer"
+
+services:
+
+    devcontainer:
+        hostname: prueba-laravel-devcontainer
+        container_name: prueba-laravel-devcontainer
+        restart: unless-stopped
+        build:
+            dockerfile: Dockerfile.devcontainer
+        user: ubuntu:ubuntu
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '5173:5173'

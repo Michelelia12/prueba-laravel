@@ -1,0 +1,65 @@
+# devcontainer-base
+# Basic VSCode DevContainer setup.
+#  - Installs base tools for development;
+#  - Adds non-root user.
+FROM ubuntu:jammy-20240911.1 as devcontainer-base
+RUN export DEBIAN_FRONTEND=noninteractive \
+ && apt update \
+ && apt install -y -qq --no-install-recommends \
+        software-properties-common lsb-release parallel \
+        bash-completion curl git git-lfs gnupg2 htop less nano \
+        ssh sudo tar unzip wget xxd xz-utils p7zip-full zip \
+ && groupadd --gid 1000 -r ubuntu \
+ && useradd  --uid 1000 -rm -d /home/ubuntu -s /bin/bash -g ubuntu -G sudo ubuntu \
+ && echo 'ubuntu:pass' | chpasswd \
+ && echo 'alias ll="ls -al"' >> /home/ubuntu/.bashrc \
+ && echo 'export GIT_PAGER=less' >> /home/ubuntu/.bashrc \
+ && rm -rf /var/lib/apt/archives /var/lib/apt/lists
+RUN wget -qO- 'https://github.com/jimeh/git-aware-prompt/archive/df8f218d4af51b1fac03f58bf0ddc776466312de.tar.gz' | tar xvz -C /opt \
+ && mv /opt/git-aware-prompt-* /opt/git-aware-prompt \
+ && echo 'export GITAWAREPROMPT=/opt/git-aware-prompt' >> /home/ubuntu/.bashrc \
+ && echo 'source "${GITAWAREPROMPT}/main.sh"' >> /home/ubuntu/.bashrc \
+ && echo 'export PS1="\${debian_chroot:+(\$debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]\$ "' >> /home/ubuntu/.bashrc
+
+# devcontainer-php
+# VSCode DevContainer with PHP.
+#  - Adds PHP binaries and common PHP modules;
+#  - Adds `php artisan` autocomplete support;
+#  - Adds `composer`.
+FROM devcontainer-base as devcontainer-php
+ADD php-artisan-autocomplete.sh /opt/php-artisan-autocomplete.sh
+RUN export DEBIAN_FRONTEND=noninteractive \
+ && add-apt-repository -y ppa:ondrej/php \
+ && apt update \
+ && apt install -y -qq --no-install-recommends \
+       php8.3 \
+       php8.3-bz2 php8.3-cli php8.3-curl php8.3-fpm php8.3-gd php8.3-intl \
+       php8.3-mbstring php8.3-pcov php8.3-uuid php8.3-xdebug \
+       php8.3-sqlite3 php8.3-mysql php8.3-pgsql \
+       php8.3-xml php8.3-yaml php8.3-zip php8.3-imagick php8.3-exif \
+       sqlite3 postgresql \
+ && curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
+ && echo 'source /opt/php-artisan-autocomplete.sh' >> /home/ubuntu/.bashrc \
+ && rm -rf /var/lib/apt/archives /var/lib/apt/lists
+RUN update-rc.d postgresql enable && service postgresql start
+
+# devcontainer-php-node
+# VSCode DevContainer with PHP and Node.js.
+#  - Installs Node.js.
+FROM devcontainer-php as devcontainer-php-node
+RUN export DEBIAN_FRONTEND=noninteractive \
+ && apt update \
+ && curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - \
+ && apt install -y -qq --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/archives /var/lib/apt/lists
+
+ # Configure image entrypoint
+RUN touch /opt/entrypoint.sh \
+ && echo '#!/bin/bash' >> /opt/entrypoint.sh \
+ && echo 'set -ex' >> /opt/entrypoint.sh \
+ && echo 'exec "$@"' >> /opt/entrypoint.sh \
+ && chmod +x /opt/entrypoint.sh
+
+WORKDIR "/home/ubuntu/workspace"
+ENTRYPOINT ["/opt/entrypoint.sh"]
+CMD ["sleep", "infinity"]

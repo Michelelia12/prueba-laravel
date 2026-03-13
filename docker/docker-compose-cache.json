@@ -1,0 +1,34 @@
+{
+  "target": {
+    "postgres": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:postgres"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:postgres"],
+      "output": ["type=docker"]
+    },
+    "postgres-secondary": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:postgres-secondary"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:postgres-secondary"],
+      "output": ["type=docker"]
+    },
+    "laravel-queue-worker": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-queue-worker"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-queue-worker"],
+      "output": ["type=docker"]
+    },
+    "laravel-schedule-worker": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-schedule-worker"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-schedule-worker"],
+      "output": ["type=docker"]
+    },
+    "laravel-http-server": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-http-server"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:laravel-http-server"],
+      "output": ["type=docker"]
+    },
+    "devcontainer": {
+      "cache-from": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:devcontainer"],
+      "cache-to": ["type=registry,ref=ghcr.io/michelelia12/prueba-laravel-cache:devcontainer"],
+      "output": ["type=docker"]
+    }
+  }
+}
