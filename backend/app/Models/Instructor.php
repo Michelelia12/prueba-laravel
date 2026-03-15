@@ -33,7 +33,8 @@ class Instructor extends Model
 
     public function averageRating(): float
     {
-        $avg = $this->ratings()::avg('score');
+        /* @phpstan-ignore-next-line */
+        $avg = $this->ratings()->avg('score');
 
         return is_numeric($avg) ? (float) $avg : 0.0;
     }

@@ -10,8 +10,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('courses', CourseController::class);
 
     // Instructor routes
-    Route::apiResource('instructors', InstructorController::class);
     Route::get('instructors/all', [CourseController::class, 'getAllInstructors']);
+    Route::apiResource('instructors', InstructorController::class);
 
     // Lesson routes
     Route::apiResource('lessons', LessonController::class);

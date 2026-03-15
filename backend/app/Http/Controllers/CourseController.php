@@ -37,6 +37,9 @@ class CourseController extends Controller
         return response()->json($instructors);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function create(): void
     {
         // API endpoint - not used
@@ -77,6 +80,9 @@ class CourseController extends Controller
         ]);
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function edit(string $id): void
     {
         // API endpoint - not used

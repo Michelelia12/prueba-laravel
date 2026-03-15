@@ -31,10 +31,10 @@ class LessonController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
             'description' => 'nullable|string',
-            'course_id' => 'required|exists:courses,id',
-            'sequence' => 'required|integer|min:0',
+            'title' => ['required', 'string', 'max:255'],
+            'sequence' => ['required', 'integer', 'min:1'],
         ]);
 
         if ($validator->fails()) {
