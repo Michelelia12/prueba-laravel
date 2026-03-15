@@ -15,6 +15,6 @@ class UserTest extends TestCase
     public function test_create_user(): void
     {
         $user = User::factory()->create();
-        $this->assertInstanceOf(User::class, $user);
+        $this::assertInstanceOf(User::class, $user);
     }
 }

@@ -1,59 +1,286 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API de Plataforma Educativa - Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Esta es una API REST completa construida con Laravel para gestionar una plataforma educativa con instructores, cursos, lecciones, videos, comentarios y calificaciones.
 
-## About Laravel
+## Características Implementadas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Modelos y Relaciones
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+#### Modelos Base:
+- **Instructor**: Profesor que imparte cursos
+- **Course**: Cursos impartidos por instructores
+- **Lesson**: Lecciones dentro de un curso
+- **Video**: Videos asociados a las lecciones
+- **User**: Usuarios de la plataforma
+- **Comment**: Comentarios en cursos e instructores (relación polimórfica)
+- **Rating**: Calificaciones de cursos e instructores (relación polimórfica)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+#### Relaciones:
+```
+Instructor (1) -> (Many) Courses
+Course (1) -> (Many) Lessons
+Lesson (1) -> (One) Video
+User (Many) -> (Many) Courses (Favoritos)
+User (1) -> (Many) Comments
+User (1) -> (Many) Ratings
+Course (Polimórfico) <- Comments
+Instructor (Polimórfico) <- Comments
+Course (Polimórfico) <- Ratings
+Instructor (Polimórfico) <- Ratings
+```
 
-## Learning Laravel
+### 2. CRUD Completo para Cursos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+#### Endpoints de Cursos:
+- `GET /api/v1/courses` - Listar todos los cursos (paginado)
+- `POST /api/v1/courses` - Crear nuevo curso
+- `GET /api/v1/courses/{id}` - Obtener detalles del curso
+- `PUT /api/v1/courses/{id}` - Actualizar curso
+- `DELETE /api/v1/courses/{id}` - Eliminar curso
+- `POST /api/v1/courses/{id}/favorite` - Marcar como favorito
+- `DELETE /api/v1/courses/{id}/favorite` - Quitar de favoritos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Validaciones en Cursos:
+```
+- title: requerido, string, máx 255 caracteres
+- instructor_id: requerido, debe existir en instructores
+```
 
-## Laravel Sponsors
+### 3. Recuperación Eficiente de Instructores
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Se implementó una consulta optimizada para manejar millones de registros:
 
-### Premium Partners
+```php
+// Usa cursor pagination para eficiencia de memoria
+// Selecciona solo las columnas necesarias (id, name, email, bio)
+// Soporta parametrización de resultados por página
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+GET /api/v1/instructors?per_page=50&cursor=...
+```
 
-## Contributing
+**Características de optimización:**
+- Cursor pagination: evita problemas de memoria con grandes datasets
+- Selección de columnas específicas: reduce transferencia de datos
+- Índices en base de datos: optimiza búsquedas
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Servicio de Cálculo de Rating
 
-## Code of Conduct
+Se implementó el servicio `CourseService` que calcula:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Métodos:
+```php
+getAverageRating(Course $course): float
+// Retorna el promedio de calificaciones de un curso
 
-## Security Vulnerabilities
+getCourseStats(Course $course): array
+// Retorna estadísticas completas del curso:
+// - average_rating
+// - total_ratings
+// - total_comments
+// - total_lessons
+// - total_favorites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+getTopRatedCourses(int $limit = 10): Collection
+// Retorna los N cursos mejor calificados
+```
 
-## License
+### 5. Endpoints Adicionales
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### Instructores:
+- `GET /api/v1/instructors` - Listar instructores (paginado)
+- `POST /api/v1/instructors` - Crear instructor
+- `GET /api/v1/instructors/{id}` - Obtener instructor con estadísticas
+- `PUT /api/v1/instructors/{id}` - Actualizar instructor
+- `DELETE /api/v1/instructors/{id}` - Eliminar instructor
+
+#### Lecciones:
+- `GET /api/v1/lessons` - Listar lecciones (filtrable por curso)
+- `POST /api/v1/lessons` - Crear lección
+- `GET /api/v1/lessons/{id}` - Obtener lección
+- `PUT /api/v1/lessons/{id}` - Actualizar lección
+- `DELETE /api/v1/lessons/{id}` - Eliminar lección
+
+### 6. Base de Datos
+
+#### Migraciones Creadas:
+- `create_instructors_table`
+- `create_courses_table`
+- `create_lessons_table`
+- `create_videos_table`
+- `create_comments_table`
+- `create_ratings_table`
+- `create_course_user_favorites_table`
+
+#### Estructura de Ejemplos:
+```sql
+-- Instructores
+id, name, email, bio, avatar, created_at, updated_at
+
+-- Cursos
+id, title, description, instructor_id, price, level, created_at, updated_at
+
+-- Lecciones
+id, title, description, course_id, sequence, created_at, updated_at
+
+-- Videos
+id, title, url, duration, lesson_id, created_at, updated_at
+
+-- Comentarios (Polimórfico)
+id, content, user_id, commentable_id, commentable_type, created_at, updated_at
+
+-- Calificaciones (Polimórfico)
+id, score, user_id, ratable_id, ratable_type, created_at, updated_at
+(Unique: user_id, ratable_id, ratable_type)
+
+-- Favoritos
+id, user_id, course_id, created_at, updated_at
+(Unique: user_id, course_id)
+```
+
+## Instalación y Configuración
+
+```bash
+# Instalar dependencias
+composer install
+
+# Configurar archivo .env
+cp .env.example .env
+
+# Generar clave de aplicación
+php artisan key:generate
+
+# Ejecutar migraciones
+php artisan migrate
+
+# (Opcional) Llenar base de datos con datos de ejemplo
+php artisan tinker
+# Dentro de tinker, ejecutar comandos de creación
+```
+
+## Ejemplos de Uso
+
+### Crear un Instructor
+```bash
+curl -X POST http://localhost:8000/api/v1/instructors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "bio": "Experto en desarrollo web",
+    "avatar": "https://example.com/avatar.jpg"
+  }'
+```
+
+### Crear un Curso
+```bash
+curl -X POST http://localhost:8000/api/v1/courses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Domina Laravel",
+    "description": "Aprende Laravel desde cero hasta avanzado",
+    "instructor_id": 1,
+    "price": 99.99,
+    "level": "intermediate"
+  }'
+```
+
+### Obtener Estadísticas de un Curso
+```bash
+curl -X GET http://localhost:8000/api/v1/courses/1
+# Retorna el curso con average_rating calculado
+```
+
+### Listar Instructores Eficientemente
+```bash
+# Primera página
+curl -X GET "http://localhost:8000/api/v1/instructors?per_page=50"
+
+# Página siguiente (usando cursor)
+curl -X GET "http://localhost:8000/api/v1/instructors?per_page=50&cursor=EYJPZCI6NTB9"
+```
+
+### Marcar Curso como Favorito
+```bash
+curl -X POST http://localhost:8000/api/v1/courses/1/favorite \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": 1}'
+```
+
+## Consideraciones de Optimización
+
+### Para Millones de Registros:
+
+1. **Cursor Pagination**: Utiliza el endpoint de instructores con cursor pagination
+   - Evita problemas de memoria con OFFSET/LIMIT
+   - Eficiente para datasets muy grandes
+
+2. **Selección de Columnas**: Solo se seleccionan columnas necesarias
+   ```php
+   Instructor::select('id', 'name', 'email', 'bio')
+   ```
+
+3. **Índices de Base de Datos**: Las relaciones foráneas crear índices automáticamente
+
+4. **Eager Loading**: Se usa `with()` para evitar N+1 queries:
+   ```php
+   Course::with(['instructor', 'ratings', 'comments'])
+   ```
+
+5. **Agregaciones Eficientes**: Se usan funciones de base de datos:
+   ```php
+   $course->ratings()->avg('score')  // SELECT AVG
+   $course->ratings()->count()        // SELECT COUNT
+   ```
+
+## Estructura del Proyecto
+
+```
+backend/
+├── app/
+│   ├── Models/
+│   │   ├── Instructor.php
+│   │   ├── Course.php
+│   │   ├── Lesson.php
+│   │   ├── Video.php
+│   │   ├── Comment.php
+│   │   ├── Rating.php
+│   │   └── User.php
+│   ├── Http/
+│   │   └── Controllers/
+│   │       ├── CourseController.php
+│   │       ├── InstructorController.php
+│   │       └── LessonController.php
+│   └── Services/
+│       └── CourseService.php
+├── database/
+│   └── migrations/
+│       ├── create_instructors_table
+│       ├── create_courses_table
+│       ├── create_lessons_table
+│       ├── create_videos_table
+│       ├── create_comments_table
+│       ├── create_ratings_table
+│       └── create_course_user_favorites_table
+├── routes/
+│   └── api.php
+└── bootstrap/
+    └── app.php
+```
+
+## Notas Importantes
+
+- No se requiere autenticación en las peticiones (como se especificó)
+- Las relaciones polimórficas permiten comentarios y calificaciones tanto en cursos como en instructores
+- El campo `unique` en ratings previene múltiples calificaciones del mismo usuario para el mismo objeto
+- Se utiliza `cascade delete` para mantener la integridad referencial
+
+## Testing
+
+Para probar la API, se proporcionó datos de ejemplo que incluyen:
+- 2 Instructores
+- 2 Cursos
+- 4 Lecciones con videos
+- Calificaciones y comentarios
+- Favoritos de cursos
+
+Puedes verificar el funcionamiento accediendo a los endpoints mencionados arriba.

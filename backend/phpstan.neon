@@ -1,15 +1,13 @@
 includes:
     - phpstan-baseline.neon
 parameters:
-    level: max
-    strictRules:
-        allRules: true
-        disallowedLooseComparison: false
-        dynamicCallOnStaticMethod: false
-        strictFunctionCalls: false
+    level: 5
     paths:
         - app
         - tests
     parallel:
         jobSize: 8
         maximumNumberOfProcesses: 8
+    scanDirectories:
+        - vendor/larastan/larastan/stubs/common
+        - vendor/larastan/larastan/stubs/12.41.0

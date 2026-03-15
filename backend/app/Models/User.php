@@ -5,9 +5,14 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int $id
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -16,7 +21,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int,string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -27,7 +32,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -45,5 +50,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function favoriteCourses(): BelongsToMany
+    {
+        return $this->belongsToMany(Course::class, 'course_user_favorites');
     }
 }
