@@ -11,10 +11,6 @@ Route::prefix('v1')->group(function () {
 
     // Instructor routes
     Route::get('instructors/all', [CourseController::class, 'getAllInstructors']);
-    Route::apiResource('instructors', InstructorController::class);
-
-    // Lesson routes
-    Route::apiResource('lessons', LessonController::class);
 
     // Special endpoints
     Route::post('/courses/{course}/favorite', [CourseController::class, 'addFavorite']);

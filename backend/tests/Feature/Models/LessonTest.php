@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Models;
 
+use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +18,7 @@ class LessonTest extends TestCase
         $video = Video::factory()->create(['lesson_id' => $lesson->id]);
 
         $this::assertInstanceOf(Video::class, $lesson->video);
+        $this::assertInstanceOf(Course::class, $lesson->course);
         $this::assertEquals($video->id, $lesson->video->id);
     }
 }
