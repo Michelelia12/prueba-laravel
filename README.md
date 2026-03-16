@@ -291,9 +291,7 @@ backend/
 │   │   ├── Rating.php
 │   │   └── User.php
 │   ├── Http/Controllers/
-│   │   ├── CourseController.php
-│   │   ├── InstructorController.php
-│   │   └── LessonController.php
+│   │   └── CourseController.php
 │   └── Services/
 │       └── CourseService.php
 ├── database/
